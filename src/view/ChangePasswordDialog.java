@@ -32,7 +32,7 @@ public class ChangePasswordDialog extends JDialog {
         add(txtNew1, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
-        add(new JLabel("Xác nhận mới:"), gbc);
+        add(new JLabel("Xác nhận lại mật khẩu:"), gbc);
         gbc.gridx = 1;
         txtNew2 = new JPasswordField(15);
         add(txtNew2, gbc);
@@ -44,6 +44,8 @@ public class ChangePasswordDialog extends JDialog {
     }
 
     private void changePassword() {
+        System.out.println("Username = [" + username + "]");
+
         String oldPass = new String(txtOld.getPassword()).trim();
         String newPass = new String(txtNew1.getPassword()).trim();
         String confirm = new String(txtNew2.getPassword()).trim();

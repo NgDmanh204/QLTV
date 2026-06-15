@@ -402,6 +402,25 @@ public class MainGUI extends JFrame {
         pnlInput.add(createLabel("Bạn đọc:"), gbc);
         gbc.gridx = 1;
         cbReaderForBorrow = new JComboBox<>();
+        cbReaderForBorrow.addActionListener(e -> {
+            if (cbReaderForBorrow.getSelectedIndex() >= 0) {
+                 try {
+                    String selected = cbReaderForBorrow.getSelectedItem().toString();
+                    int readerId = Integer.parseInt(
+                    selected.split(" - ")[0]);
+                     Reader reader = readerDAO.getReaderById(readerId);
+                if (reader != null) {
+                txtSdtMuon.setText(reader.getPhone());
+                } else {
+                txtSdtMuon.setText("");
+                     }
+                } catch (Exception ex) {
+                 txtSdtMuon.setText("");
+                 }
+           }
+        });
+        cbReaderForBorrow.setPreferredSize(new Dimension(200, 32));
+        pnlInput.add(cbReaderForBorrow, gbc);
         cbReaderForBorrow.setPreferredSize(new Dimension(200, 32));
         pnlInput.add(cbReaderForBorrow, gbc);
         gbc.gridx = 2;
@@ -631,7 +650,7 @@ public class MainGUI extends JFrame {
     private void sendReminderEmail() {
         String sql = "SELECT DISTINCT r.email, r.fullname, b.return_date, b.book_code " +
                      "FROM borrows b JOIN readers r ON b.reader_id = r.id " +
-                     "WHERE DATEDIFF(b.return_date, CURDATE()) BETWEEN 0 AND 2";
+                     "WHERE DATEDIFF(b.return_date, CURDATE()) >=0";
         try (Connection conn = DBConnection.getConnection();
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {

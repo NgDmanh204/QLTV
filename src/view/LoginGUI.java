@@ -63,9 +63,24 @@ public class LoginGUI extends JFrame {
         btnLogin.setPreferredSize(new Dimension(120, 38));
         gbc.gridy = 3; gbc.gridx = 0; gbc.gridwidth = 2;
         panel.add(btnLogin, gbc);
+        gbc.gridy = 4;
+        JButton btnQRLogin = new JButton("Đăng nhập bằng QR");
+        btnQRLogin.setBackground(new Color(39, 174, 96));
+        btnQRLogin.setForeground(Color.WHITE);
+        btnQRLogin.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnQRLogin.setFocusPainted(false);
+        btnQRLogin.setBorderPainted(false);
+        btnQRLogin.setOpaque(true);
+        btnQRLogin.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnQRLogin.setPreferredSize(new Dimension(120, 38));
+        panel.add(btnQRLogin, gbc);
 
         add(panel);
         btnLogin.addActionListener(e -> login());
+        btnQRLogin.addActionListener(e -> {
+        QRLoginDialog qrDialog = new QRLoginDialog(this);
+        qrDialog.setVisible(true);
+        });
         getRootPane().setDefaultButton(btnLogin);
     }
 
