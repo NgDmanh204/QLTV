@@ -40,6 +40,7 @@ import model.Reader;
 import model.Book;
 
 public class MainGUI extends JFrame {
+    private User currentUser;
 
     // PlaceholderTextField
     private static class PlaceholderTextField extends JTextField {
@@ -111,7 +112,9 @@ public class MainGUI extends JFrame {
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private PlaceholderTextField txtSearchBorrow;
 
-    public MainGUI() {
+    public MainGUI(User user) {
+        this.currentUser = user;
+
         initUI();
         loadAllData();
         updateDashboard();
@@ -627,7 +630,7 @@ public class MainGUI extends JFrame {
         panel.add(btnQRLogin);
 
         btnUserMgmt.addActionListener(e -> new UserManagementDialog(this).setVisible(true));
-        btnChangePass.addActionListener(e -> new ChangePasswordDialog(this, "admin").setVisible(true));
+        btnChangePass.addActionListener(e -> new ChangePasswordDialog(this, currentUser.getUsername()).setVisible(true));
         btnBackup.addActionListener(e -> backupDatabase());
         btnSendReminder.addActionListener(e -> sendReminderEmail());
         btnQRLogin.addActionListener(e -> new QRLoginDialog(this).setVisible(true));
@@ -649,8 +652,8 @@ public class MainGUI extends JFrame {
 
     private void sendReminderEmail() {
         String sql = "SELECT DISTINCT r.email, r.fullname, b.return_date, b.book_code " +
-                     "FROM borrows b JOIN readers r ON b.reader_id = r.id " +
-                     "WHERE DATEDIFF(b.return_date, CURDATE()) >=0";
+             "FROM borrows b JOIN readers r ON b.reader_id = r.id " +
+             "WHERE b.return_date < CURDATE()";
         try (Connection conn = DBConnection.getConnection();
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
@@ -909,14 +912,25 @@ public class MainGUI extends JFrame {
         if (b != null) {
             b.setFine(fine);
             b.setReturnDate(ngayTraThuc);
-            if (borrowDAO.updateBorrow(b)) {
-                capNhatSoLuongSach(maSach, +1);
-                JOptionPane.showMessageDialog(this, "Trả sách thành công!" + (fine > 0 ? " - Phạt " + String.format("%,.0f", fine) : ""));
-                loadBorrowData();
-                loadBookData();
-            } else {
-                JOptionPane.showMessageDialog(this, "Trả sách thất bại!");
-            }
+            if (borrowDAO.deleteBorrow(id)) {
+
+            capNhatSoLuongSach(maSach, +1);
+
+             JOptionPane.showMessageDialog(
+             this,
+             "Trả sách thành công!"
+             );
+
+             loadBorrowData();
+             loadBookData();
+
+             } else {
+
+                 JOptionPane.showMessageDialog(
+                 this,
+             "Trả sách thất bại!"
+                 );
+             } 
         }
     }
 
@@ -1083,7 +1097,7 @@ public class MainGUI extends JFrame {
         private JTextField txtUsername, txtFullname, txtNewPass;
         private JComboBox<String> cbRole;
         public UserManagementDialog(Frame parent) {
-            super(parent, "Quản lý người dùng", true);
+            super(parent, "TEST USER UPDATE", true);
             setSize(600, 500);
             setLocationRelativeTo(parent);
             setLayout(new BorderLayout());

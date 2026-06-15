@@ -57,13 +57,16 @@ public class UserManagementDialog extends JDialog {
         btnRefresh.addActionListener(e -> loadUsers());
 
         table.getSelectionModel().addListSelectionListener(e -> {
-            int row = table.getSelectedRow();
-            if (row >= 0) {
-                txtUsername.setText(model.getValueAt(row, 1).toString());
-                txtFullname.setText(model.getValueAt(row, 2).toString());
-                cbRole.setSelectedItem(model.getValueAt(row, 3).toString());
-            }
-        });
+    if (!e.getValueIsAdjusting()) {
+        int row = table.getSelectedRow();
+
+        if (row >= 0) {
+            txtUsername.setText(model.getValueAt(row, 1).toString()); // Username
+            txtFullname.setText(model.getValueAt(row, 2).toString()); // Họ tên
+            cbRole.setSelectedItem(model.getValueAt(row, 3).toString()); // Role
+        }
+    }
+});
     }
 
     private void loadUsers() {
@@ -102,27 +105,70 @@ public class UserManagementDialog extends JDialog {
         }
     }
 
-    private void updateUser() {
-        int row = table.getSelectedRow();
-        if (row < 0) return;
-        int id = (int) model.getValueAt(row, 0);
-        String full = txtFullname.getText().trim();
-        String role = cbRole.getSelectedItem().toString();
-        String newPass = txtNewPass.getText().trim();
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                 "UPDATE users SET fullname=?, role=?" + (newPass.isEmpty() ? "" : ", password=?") + " WHERE id=?")) {
-            ps.setString(1, full);
-            ps.setString(2, role);
-            if (!newPass.isEmpty()) ps.setString(3, newPass);
-            ps.setInt(newPass.isEmpty() ? 3 : 4, id);
-            ps.executeUpdate();
+   private void updateUser() {
+    int row = table.getSelectedRow();
+
+    if (row < 0) {
+        JOptionPane.showMessageDialog(this,
+                "Vui lòng chọn người dùng cần cập nhật!");
+        return;
+    }
+
+    int id = (int) model.getValueAt(row, 0);
+
+    String user = txtUsername.getText().trim();
+    String full = txtFullname.getText().trim();
+    String role = cbRole.getSelectedItem().toString();
+    String newPass = txtNewPass.getText().trim();
+
+    if (user.isEmpty() || full.isEmpty()) {
+        JOptionPane.showMessageDialog(this,
+                "Username và Họ tên không được để trống!");
+        return;
+    }
+
+    try (Connection conn = DBConnection.getConnection()) {
+
+        String sql;
+
+        if (newPass.isEmpty()) {
+            sql = "UPDATE users SET username=?, fullname=?, role=? WHERE id=?";
+        } else {
+            sql = "UPDATE users SET username=?, fullname=?, role=?, password=? WHERE id=?";
+        }
+
+        PreparedStatement ps = conn.prepareStatement(sql);
+
+        ps.setString(1, user);
+        ps.setString(2, full);
+        ps.setString(3, role);
+
+        if (newPass.isEmpty()) {
+            ps.setInt(4, id);
+        } else {
+            ps.setString(4, newPass);
+            ps.setInt(5, id);
+        }
+
+        int result = ps.executeUpdate();
+
+        if (result > 0) {
+            JOptionPane.showMessageDialog(this,
+                    "Cập nhật thành công!");
+
             loadUsers();
             clearForm();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } else {
+            JOptionPane.showMessageDialog(this,
+                    "Không tìm thấy người dùng để cập nhật!");
         }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this,
+                "Lỗi: " + e.getMessage());
     }
+}
 
     private void deleteUser() {
         int row = table.getSelectedRow();

@@ -101,7 +101,7 @@ public class LoginGUI extends JFrame {
         User loggedUser = userDAO.login(user, pass);
         if (loggedUser != null) {
             JOptionPane.showMessageDialog(this, "Chào mừng " + loggedUser.getFullname() + "!");
-            new MainGUI().setVisible(true);
+            new MainGUI(loggedUser).setVisible(true);
             dispose();
         } else {
             JOptionPane.showMessageDialog(this, "Sai tên đăng nhập hoặc mật khẩu!", "Lỗi", JOptionPane.ERROR_MESSAGE);

@@ -11,6 +11,7 @@ import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 
 import dao.UserDAO;
+import model.User;
 
 public class QRLoginDialog extends JDialog {
 
@@ -67,13 +68,15 @@ public class QRLoginDialog extends JDialog {
                     String user = parts[0];
                     String pass = parts[1];
 
-                    if (new UserDAO().login(user, pass) != null) {
+                    User loggedUser = new UserDAO().login(user, pass);
+
+                    if (loggedUser != null) {
 
                         JOptionPane.showMessageDialog(
                                 this,
                                 "Đăng nhập thành công!");
 
-                        new MainGUI().setVisible(true);
+                        new MainGUI(loggedUser).setVisible(true);
 
                         if (getOwner() != null) {
                             getOwner().dispose();
